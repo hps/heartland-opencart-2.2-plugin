@@ -40,7 +40,7 @@ class ControllerPaymentSecureSubmit extends Controller {
 		if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/securesubmit.tpl')) {
 			return $this->load->view($this->config->get('config_template') . '/template/payment/securesubmit.tpl', $data);
 		} else {
-			return $this->load->view('default/template/payment/securesubmit.tpl', $data);
+			return $this->load->view('payment/securesubmit.tpl', $data);
 		}
 	}
 
@@ -59,7 +59,7 @@ class ControllerPaymentSecureSubmit extends Controller {
         $config->developerId = '002914';
 
        $chargeService = new HpsCreditService($config);
-        
+
         $address = new HpsAddress();
         $address->address = html_entity_decode($order_info['payment_address_1'], ENT_QUOTES, 'UTF-8');
         $address->city = html_entity_decode($order_info['payment_city'], ENT_QUOTES, 'UTF-8');
