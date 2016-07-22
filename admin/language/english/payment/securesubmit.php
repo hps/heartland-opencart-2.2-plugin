@@ -25,6 +25,7 @@ $_['entry_live_public_key']  = 'Live Public Key';
 $_['entry_mode']         = 'API Key Mode';
 $_['entry_method']       = 'Transaction Method';
 $_['entry_total']        = 'Total';
+$_['entry_use_iframes']  = 'Host payment fields on Heartland\'s servers';
 $_['entry_order_status'] = 'Order Status';
 $_['entry_geo_zone']     = 'Geo Zone';
 $_['entry_status']       = 'Status';
@@ -39,4 +40,3 @@ $_['entry_fraud_time']   = 'How long (in minutes) should we keep a tally of rece
 $_['error_permission']   = 'Warning: You do not have permission to modify payment SecureSubmit!';
 $_['error_login']        = 'Login ID Required!';
 $_['error_key']          = 'Transaction Key Required!';
-?>

@@ -1,3 +1,10 @@
+<?php
+  global $config;
+  $securesubmit_public_key = $config->get('securesubmit_mode') == 'test'
+      ? $config->get('securesubmit_test_public_key')
+      : $config->get('securesubmit_live_public_key');
+  $securesubmit_use_iframes = !!($config->get('securesubmit_use_iframes'));
+?>
 <link rel="stylesheet" type="text/css" href="catalog/view/stylesheet/securesubmit.css">
 <form class="form-horizontal">
   <fieldset id="payment">
@@ -23,20 +30,32 @@
 
       <label class="control-label ss-label" for="input-cc-number"><?php echo $entry_cc_number; ?></label></br>
 
-        <input type="text" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />
+        <?php if ($securesubmit_use_iframes): ?>
+          <div id="securesubmitIframeCardNumber" class="form-control ss-form-control"></div>
+        <?php else: ?>
+          <input type="text" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />
+        <?php endif; ?>
 
     </div>
 
    <div class="form-group required col-md-5">
       <label class="control-label ss-label" for="input-cc-expire-date"><?php echo $entry_cc_expire_date; ?></label></br>
 
-        <input type="text" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />
+        <?php if ($securesubmit_use_iframes): ?>
+          <div id="securesubmitIframeCardExpiration" class="form-control ss-form-control"></div>
+        <?php else: ?>
+          <input type="text" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />
+        <?php endif; ?>
 
     </div>
     <div class="form-group required col-md-5 col-md-offset-7">
         <label class="control-label ss-label cvv-label" for="input-cc-cvv2"><?php echo $entry_cc_cvv2; ?></label></br>
 
-        <input type="text" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
+        <?php if ($securesubmit_use_iframes): ?>
+          <div id="securesubmitIframeCardCvv" class="form-control ss-form-control"></div>
+        <?php else: ?>
+          <input type="text" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
+        <?php endif; ?>
 
 
     </div>
@@ -67,25 +86,35 @@ $(document).ready(function () {
   });
 
   function secureSubmitFormHandler() {
-    var securesubmit_public_key = "<?php global $config; echo ($config->get('securesubmit_mode') == 'test')
-      ? $config->get('securesubmit_test_public_key') : $config->get('securesubmit_live_public_key'); ?>";
+    var securesubmit_public_key = '<?php echo $securesubmit_public_key;?>';
 
     if ($('input.securesubmitToken').size() === 0) {
-      var card  = $('#input-cc-number').val().replace(/\D/g, '');
-      var cvc   = $('#input-cc-cvv2').val();
-      var exp   = $('#input-cc-expire-date').val().split(' / ');
-      var month = exp[0];
-      var year  = exp[1];
-      (new Heartland.HPS({
-        publicKey: securesubmit_public_key,
-        cardNumber: card,
-        cardCvv: cvc,
-        cardExpMonth: month,
-        cardExpYear: year,
-        success: secureSubmitResponseHandler,
-        error: secureSubmitResponseHandler
-      })).tokenize();
-      return false;
+      if (<?php echo ($securesubmit_use_iframes ? 'true' : 'false');?>) {
+        window.hps.Messages.post(
+          {
+            accumulateData: true,
+            action: 'tokenize',
+            message: securesubmit_public_key
+          },
+          'cardNumber'
+        );
+      } else {
+        var card  = $('#input-cc-number').val().replace(/\D/g, '');
+        var cvc   = $('#input-cc-cvv2').val();
+        var exp   = $('#input-cc-expire-date').val().split(' / ');
+        var month = exp[0];
+        var year  = exp[1];
+        (new Heartland.HPS({
+          publicKey: securesubmit_public_key,
+          cardNumber: card,
+          cardCvv: cvc,
+          cardExpMonth: month,
+          cardExpYear: year,
+          success: secureSubmitResponseHandler,
+          error: secureSubmitResponseHandler
+        })).tokenize();
+        return false;
+      }
     }
 
     return true;
@@ -147,9 +176,60 @@ $(document).ready(function () {
   }, 0);
 
   setTimeout(function () {
-    Heartland.Card.attachNumberEvents('#input-cc-number');
-    Heartland.Card.attachExpirationEvents('#input-cc-expire-date');
-    Heartland.Card.attachCvvEvents('#input-cc-cvv2');
+    var securesubmit_public_key = '<?php echo $securesubmit_public_key;?>';
+
+    if (<?php echo ($securesubmit_use_iframes ? 'true' : 'false');?>) {
+      // Create a new `HPS` object with the necessary configuration
+      window.hps = new Heartland.HPS({
+        publicKey: securesubmit_public_key,
+        type:      'iframe',
+        // Configure the iframe fields to tell the library where
+        // the iframe should be inserted into the DOM and some
+        // basic options
+        fields: {
+          cardNumber: {
+            target:      'securesubmitIframeCardNumber',
+            placeholder: '•••• •••• •••• ••••'
+          },
+          cardExpiration: {
+            target:      'securesubmitIframeCardExpiration',
+            placeholder: 'MM / YYYY'
+          },
+          cardCvv: {
+            target:      'securesubmitIframeCardCvv',
+            placeholder: 'CVV'
+          }
+        },
+        // Collection of CSS to inject into the iframes.
+        // These properties can match the site's styles
+        // to create a seamless experience.
+        style: {
+          'input': {
+            // 'background': '#fff',
+            // 'border': '1px solid',
+            // 'border-color': '#bbb3b9 #c7c1c6 #c7c1c6',
+            // 'box-sizing': 'border-box',
+            // 'font-family': 'serif',
+            // 'font-size': '16px',
+            // 'line-height': '1',
+            // 'margin': '0 .5em 0 0',
+            // 'max-width': '100%',
+            // 'outline': '0',
+            // 'padding': '0.5278em',
+            // 'vertical-align': 'baseline',
+            // 'width': '100%'
+          }
+        },
+        // Callback when a token is received from the service
+        onTokenSuccess: secureSubmitResponseHandler,
+        // Callback when an error is received from the service
+        onTokenError: secureSubmitResponseHandler
+      });
+    } else {
+      Heartland.Card.attachNumberEvents('#input-cc-number');
+      Heartland.Card.attachExpirationEvents('#input-cc-expire-date');
+      Heartland.Card.attachCvvEvents('#input-cc-cvv2');
+    }
   }, 1000);
 });
 </script>
