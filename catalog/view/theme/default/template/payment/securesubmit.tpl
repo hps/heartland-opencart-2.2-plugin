@@ -6,6 +6,14 @@
   $securesubmit_use_iframes = !!($config->get('securesubmit_use_iframes'));
 ?>
 <link rel="stylesheet" type="text/css" href="catalog/view/stylesheet/securesubmit.css">
+
+<?php if ($securesubmit_use_iframes): // help prevent flash of no fields ?>
+  <link rel="dns-prefetch" href="https://hps.github.io" />
+  <link rel="prefetch" href="https://hps.github.io" />
+  <link rel="dns-prefetch" href="https://api.heartlandportico.com" />
+  <link rel="prefetch" href="https://api.heartlandportico.com" />
+<?php endif; ?>
+
 <form class="form-horizontal">
   <fieldset id="payment">
     <legend><?php echo $text_credit_card; ?><br>
@@ -19,21 +27,14 @@
 
     </legend>
 
-  <!--  <div class="form-group required col-md-10 ">
-
-      <label class="control-label ss-label" for="input-cc-owner"><?php echo $entry_cc_owner; ?></label></br>
-
-        <input type="text" name="cc_owner" value="" placeholder="<?php echo $entry_cc_owner; ?>" id="input-cc-owner" class="form-control ss-form-control" />
-
-    </div> -->
      <div class="form-group required col-md-10">
 
       <label class="control-label ss-label" for="input-cc-number"><?php echo $entry_cc_number; ?></label></br>
 
         <?php if ($securesubmit_use_iframes): ?>
-          <div id="securesubmitIframeCardNumber" class="form-control ss-form-control"></div>
+          <div id="securesubmitIframeCardNumber" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="text" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />
+          <input type="tel" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />
         <?php endif; ?>
 
     </div>
@@ -42,9 +43,9 @@
       <label class="control-label ss-label" for="input-cc-expire-date"><?php echo $entry_cc_expire_date; ?></label></br>
 
         <?php if ($securesubmit_use_iframes): ?>
-          <div id="securesubmitIframeCardExpiration" class="form-control ss-form-control"></div>
+          <div id="securesubmitIframeCardExpiration" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="text" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />
+          <input type="tel" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />
         <?php endif; ?>
 
     </div>
@@ -52,9 +53,9 @@
         <label class="control-label ss-label cvv-label" for="input-cc-cvv2"><?php echo $entry_cc_cvv2; ?></label></br>
 
         <?php if ($securesubmit_use_iframes): ?>
-          <div id="securesubmitIframeCardCvv" class="form-control ss-form-control"></div>
+          <div id="securesubmitIframeCardCvv" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="text" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
+          <input type="tel" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
         <?php endif; ?>
 
 
@@ -160,23 +161,26 @@ $(document).ready(function () {
     });
   }
 
-  function loadjsfile(filename, filetype){
+  function loadjsfile(filename, filetype, callback) {
     if (filetype === "js") { //if filename is a external JavaScript file
       var fileref = document.createElement('script');
       fileref.setAttribute("type","text/javascript");
       fileref.setAttribute("src", filename);
+    }
+    if (typeof fileref !== "undefined" && typeof callback !== 'undefined') {
+      fileref.setAttribute('onload', callback);
     }
     if (typeof fileref !== "undefined") {
       document.getElementsByTagName("head")[0].appendChild(fileref);
     }
   }
 
-  setTimeout(function () {
-    loadjsfile("https://api.heartlandportico.com/SecureSubmit.v1/token/2.1/securesubmit.js", "js") //dynamically load and add this .js file
-  }, 0);
+  //dynamically load and add this .js file
+  loadjsfile("https://api.heartlandportico.com/SecureSubmit.v1/token/2.1/securesubmit.js", "js", 'secureSubmitPrepareFields();');
 
-  setTimeout(function () {
+  window.secureSubmitPrepareFields = function () {
     var securesubmit_public_key = '<?php echo $securesubmit_public_key;?>';
+    var image_base = '<?php echo $base_url; ?>catalog/view/image';
 
     if (<?php echo ($securesubmit_use_iframes ? 'true' : 'false');?>) {
       // Create a new `HPS` object with the necessary configuration
@@ -205,19 +209,90 @@ $(document).ready(function () {
         // to create a seamless experience.
         style: {
           'input': {
-            // 'background': '#fff',
-            // 'border': '1px solid',
-            // 'border-color': '#bbb3b9 #c7c1c6 #c7c1c6',
-            // 'box-sizing': 'border-box',
-            // 'font-family': 'serif',
-            // 'font-size': '16px',
-            // 'line-height': '1',
-            // 'margin': '0 .5em 0 0',
-            // 'max-width': '100%',
-            // 'outline': '0',
-            // 'padding': '0.5278em',
-            // 'vertical-align': 'baseline',
-            // 'width': '100%'
+            'font-size': '12px',
+            'border': '1px solid #ababab',
+            'border-radius': '0px',
+            'display': '-webkit-inline-box',
+            'height': '40px',
+            'width': '95%',
+            'padding': '6px 12px',
+            'padding-right': '0',
+            'line-height': '1.42857143',
+            'color': '#555',
+            'background-color': '#fff',
+            'box-shadow': 'inset 0 1px 1px rgba(0,0,0,.075)',
+            'transition': 'border-color ease-in-out.15s,box-shadow ease-in-out .15s',
+            'font-family': '"Helvetica Neue",Helvetica,Arial,sans-serif',
+            'margin': '0'
+          },
+          '@media only screen and (max-width: 991px)': {
+            'input[name="cardNumber"]': {
+              'width': '95%'
+            }
+          },
+          '@media only screen and (min-width: 992px) and (max-width: 1199px)': {
+            'input[name="cardNumber"]': {
+              'width': '93.5%'
+            }
+          },
+          '@media only screen and (min-width: 1200px)': {
+            'input[name="cardNumber"]': {
+              'width': '93.5%'
+            }
+          },
+          'input[name="cardNumber"]': {
+            'background-image': 'url("' + image_base + '/ss-inputcard-blank@2x.png")',
+            'background-repeat': 'no-repeat',
+            'background-size': '56px 33px',
+            'background-position': 'right'
+          },
+          'input[name="cardCvv"]': {
+            'background-image': 'url("' + image_base + '/cvv1.png")',
+            'background-repeat': 'no-repeat',
+            'background-position': 'right',
+            'background-size': '60px 36px'
+          },
+          // invalid
+          'input[name="cardNumber"].card-type-visa.invalid': {
+            'background-image': 'url("' + image_base + '/visa-gray.png")',
+            'background-size': '50px 18px'
+          },
+          'input[name="cardNumber"].card-type-amex.invalid': {
+            'background-image': 'url("' + image_base + '/amex-gray.png")',
+            'background-size': '30px 30px'
+          },
+          'input[name="cardNumber"].card-type-jcb.invalid': {
+            'background-image': 'url("' + image_base + '/jcb-gray.png")',
+            'background-size': '40px 30px'
+          },
+          'input[name="cardNumber"].card-type-discover.invalid': {
+            'background-image': 'url("' + image_base + '/disc-gray.png")',
+            'background-size': '70px 50px'
+          },
+          'input[name="cardNumber"].card-type-mastercard.invalid': {
+            'background-image': 'url("' + image_base + '/mc-gray.png")',
+            'background-size': '50px 30px'
+          },
+          // valid
+          'input[name="cardNumber"].card-type-visa.valid': {
+            'background-image': 'url("' + image_base + '/ss-inputcard-visa@2x.png")',
+            'background-size': '81px 48px'
+          },
+          'input[name="cardNumber"].card-type-mastercard.valid': {
+            'background-image': 'url("' + image_base + '/ss-inputcard-mastercard@2x.png")',
+            'background-size': '60px 39px'
+          },
+          'input[name="cardNumber"].card-type-discover.valid': {
+            'background-image': 'url("' + image_base + '/ss-inputcard-discover@2x.png")',
+            'background-size': '93px 44px'
+          },
+          'input[name="cardNumber"].card-type-jcb.valid': {
+            'background-image': 'url("' + image_base + '/ss-inputcard-jcb@2x.png")',
+            'background-size': '61px 37px'
+          },
+          'input[name="cardNumber"].card-type-amex.valid': {
+            'background-image': 'url("' + image_base + '/ss-inputcard-amex@2x.png")',
+            'background-size': '51px 34px'
           }
         },
         // Callback when a token is received from the service
@@ -230,6 +305,6 @@ $(document).ready(function () {
       Heartland.Card.attachExpirationEvents('#input-cc-expire-date');
       Heartland.Card.attachCvvEvents('#input-cc-cvv2');
     }
-  }, 1000);
+  }
 });
 </script>

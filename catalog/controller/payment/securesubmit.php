@@ -144,6 +144,15 @@ class ControllerPaymentSecureSubmit extends Controller
             );
         }
 
+        if (isset($this->request->server['HTTPS'])
+            && (($this->request->server['HTTPS'] == 'on')
+            || ($this->request->server['HTTPS'] == '1'))
+        ) {
+            $data['base_url'] = $this->config->get('config_ssl');
+        } else {
+            $data['base_url'] = $this->config->get('config_url');
+        }
+
         if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/payment/securesubmit.tpl')) {
             return $this->load->view($this->config->get('config_template') . '/template/payment/securesubmit.tpl', $data);
         } else {
