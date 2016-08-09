@@ -38,7 +38,7 @@ class ControllerPaymentSecureSubmit extends Controller {
 		$data['entry_mode'] = $this->language->get('entry_mode');
 		$data['entry_method'] = $this->language->get('entry_method');
 		$data['entry_total'] = $this->language->get('entry_total');
-        $data['entry_use_iframes'] = $this->language->get('entry_use_iframes');
+		$data['entry_use_iframes'] = $this->language->get('entry_use_iframes');
 		$data['entry_order_status'] = $this->language->get('entry_order_status');
 		$data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
 		$data['entry_status'] = $this->language->get('entry_status');
