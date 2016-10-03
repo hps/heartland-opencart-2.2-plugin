@@ -3,7 +3,7 @@
 This extension allows OpenCart to use the Heartland Payment Systems Gateway. All card data is tokenized using Heartland's SecureSubmit product.
 
 ## Installation
-
+If you are upgrading/installing to OpenCart please use [OpenCart 2.3.0.2 Extension](https://github.com/hps/heartland-opencart-plugin/tree/opencart-2-3-0-2-extension-structural-changes)
 ## Usage
 Download the contents and extract to the root of your OpenCart install folder.
 
