@@ -38,6 +38,7 @@ class ControllerPaymentSecureSubmit extends Controller {
 		$data['entry_mode'] = $this->language->get('entry_mode');
 		$data['entry_method'] = $this->language->get('entry_method');
 		$data['entry_total'] = $this->language->get('entry_total');
+		$data['entry_use_iframes'] = $this->language->get('entry_use_iframes');
 		$data['entry_order_status'] = $this->language->get('entry_order_status');
 		$data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
 		$data['entry_status'] = $this->language->get('entry_status');
@@ -143,6 +144,12 @@ class ControllerPaymentSecureSubmit extends Controller {
 			$data['securesubmit_total'] = $this->request->post['securesubmit_total'];
 		} else {
 			$data['securesubmit_total'] = $this->config->get('securesubmit_total');
+		}
+
+		if (isset($this->request->post['securesubmit_use_iframes'])) {
+			$data['securesubmit_use_iframes'] = $this->request->post['securesubmit_use_iframes'];
+		} else {
+			$data['securesubmit_use_iframes'] = $this->config->get('securesubmit_use_iframes');
 		}
 
 		if (isset($this->request->post['securesubmit_order_status_id'])) {
