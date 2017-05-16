@@ -170,7 +170,7 @@ class ControllerPaymentSecureSubmit extends Controller
         // \ModelCheckoutOrder::getOrder
         $order_info = $this->model_checkout_order->getOrder($orderID);
         $curCode = $order_info['currency_code'];
-        $amt = $order_info['total'];
+        $amt = number_format($order_info['total'], 2, '.', '');
         $json = array();
 
         // \ControllerPaymentSecureSubmit::getHpsCardHolder
