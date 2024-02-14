@@ -36,7 +36,7 @@
         <?php else: ?>
           <input type="tel" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />
         <?php endif; ?>
-
+         <p class="error-message" id="gps-card-error"></p>
     </div>
 
    <div class="form-group required col-md-5">
@@ -47,7 +47,7 @@
         <?php else: ?>
           <input type="tel" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />
         <?php endif; ?>
-
+        <p class="error-message" id="gps-expiry-error"></p>
     </div>
     <div class="form-group required col-md-5 col-md-offset-7">
         <label class="control-label ss-label cvv-label" for="input-cc-cvv2"><?php echo $entry_cc_cvv2; ?></label></br>
@@ -57,6 +57,7 @@
         <?php else: ?>
           <input type="tel" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
         <?php endif; ?>
+        <p class="error-message" id="gps-cvv-error"></p>
     </div>
     <div class="form-group required ">
         <?php if ($securesubmit_use_iframes): ?>
@@ -154,6 +155,8 @@ $(document).ready(function () {
       },
       complete: function () {
         $('#button-confirm').button('reset');
+         var submit_button = document.getElementById('submit_button');
+         submit_button.classList.remove("disable-button");
       },
       success: function (json){
         if (json['error']) {
@@ -235,10 +238,6 @@ $(document).ready(function () {
               'padding'          : '6px 12px',
               'width'            : '100%',
             },
-            '#button-confirm':{
-              'display':'none'
-            },
-
             '#secure-payment-field:focus' : {
               "border": "1px solid lightblue",
               "box-shadow": "0 1px 3px 0 #cecece",
@@ -261,6 +260,11 @@ $(document).ready(function () {
           }
       });
 
+      window.hps.on('submit', 'click', function(){
+        var submit_button = document.getElementById('submit_button');
+         submit_button.classList.add("disable-button");
+      });
+
       window.hps.ready(
         function () {
           document.getElementById("button-confirm").style.display = "none";
@@ -268,12 +272,45 @@ $(document).ready(function () {
       );
 
       window.hps.on("token-success", function(resp) {
-        secureSubmitResponseHandler(resp);
-      });
+        window.hps.errors();
+        if(resp.details.cardSecurityCode == false){
+            document.getElementById("gps-expiry-error").style.display = 'block';
+            document.getElementById("gps-expiry-error").innerText = 'Invalid Card Details';
+            var submit_button = document.getElementById('submit_button');
+            submit_button.classList.remove("disable-button");
+        }else{
+            secureSubmitResponseHandler(resp);
+        }
+     });
 
       window.hps.on("token-error", function(resp) {
-        secureSubmitResponseHandler(resp);
-      });
+        if(resp.error){
+          resp.reasons.forEach(function(v){
+              if(v.code == "INVALID_CARD_NUMBER"){
+                document.getElementById("gps-card-error").style.display = 'block';
+                document.getElementById("gps-card-error").innerText = v.message;
+              }else{
+                alert(v.message);
+              }
+          })
+        }
+        var submit_button = document.getElementById('submit_button');
+        submit_button.classList.remove("disable-button");
+     });
+
+      window.hps.errors = function(){
+          var errorsDiv = document.getElementsByClassName("error-message");
+          for(var i = 0; i < errorsDiv.length; i++){
+              errorsDiv[i].style.display = "none";
+          }
+      }
+
+      window.hps.stopConfirm = function(){
+          var errorsDiv = document.getElementsByClassName("error-message");
+          for(var i = 0; i < errorsDiv.length; i++){
+              errorsDiv[i].style.display = "none";
+          }
+      }
     } else {
       Heartland.Card.attachNumberEvents('#input-cc-number');
       Heartland.Card.attachExpirationEvents('#input-cc-expire-date');
