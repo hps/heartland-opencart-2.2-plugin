@@ -3,47 +3,37 @@
   $securesubmit_public_key = $config->get('securesubmit_mode') == 'test'
       ? $config->get('securesubmit_test_public_key')
       : $config->get('securesubmit_live_public_key');
-  
 ?>
 <link rel="stylesheet" type="text/css" href="catalog/view/stylesheet/securesubmit.css">
-
-
-  <link rel="dns-prefetch" href="https://hps.github.io" />
-  <link rel="prefetch" href="https://hps.github.io" />
-  <link rel="dns-prefetch" href="https://api.heartlandportico.com" />
-  <link rel="prefetch" href="https://api.heartlandportico.com" />
+<link rel="dns-prefetch" href="https://hps.github.io" />
+<link rel="prefetch" href="https://hps.github.io" />
+<link rel="dns-prefetch" href="https://api.heartlandportico.com" />
+<link rel="prefetch" href="https://api.heartlandportico.com" />
 
 
 <form class="form-horizontal">
   <fieldset id="payment">
     <legend><?php echo $text_credit_card; ?><br>
-
-      <div class="ss-shield">  </div>
+        <div class="ss-shield"></div>
         <div class="visa-gray hidden-xs "></div>
         <div class="mc-gray hidden-xs"></div>
         <div class="amex-gray hidden-xs"></div>
         <div class="jcb-gray hidden-xs"></div>
         <div class="disc-gray hidden-xs"></div>
-
     </legend>
 
-     <div class="form-group required col-md-10">
-
-      <label class="control-label ss-label" for="input-cc-number"><?php echo $entry_cc_number; ?></label></br>
-
+    <div class="form-group required col-md-10">
+        <label class="control-label ss-label" for="input-cc-number"><?php echo $entry_cc_number; ?></label></br>
         <div id="securesubmitIframeCardNumber" class="ss-frame-container"></div>
          <p class="error-message" id="gps-card-error"></p>
     </div>
-
-   <div class="form-group required col-md-5">
-      <label class="control-label ss-label" for="input-cc-expire-date"><?php echo $entry_cc_expire_date; ?></label></br>
-
+    <div class="form-group required col-md-5">
+        <label class="control-label ss-label" for="input-cc-expire-date"><?php echo $entry_cc_expire_date; ?></label></br>
         <div id="securesubmitIframeCardExpiration" class="ss-frame-container"></div>
         <p class="error-message" id="gps-expiry-error"></p>
     </div>
     <div class="form-group required col-md-5 col-md-offset-7">
         <label class="control-label ss-label cvv-label" for="input-cc-cvv2"><?php echo $entry_cc_cvv2; ?></label></br>
-
         <div id="securesubmitIframeCardCvv" class="ss-frame-container"></div>
         <p class="error-message" id="gps-cvv-error"></p>
     </div>
@@ -60,7 +50,6 @@ $(document).ready(function () {
     var bodyTag = $('body').first();
     if (response.message) {
       alert(response.message);
-      
     } else {
       bodyTag.append("<input type='hidden' class='securesubmitToken' name='securesubmitToken' value='" + response.paymentReference + "'/>");
       form_submit();
@@ -80,10 +69,9 @@ $(document).ready(function () {
       dataType: 'json',
       cache: false,
       beforeSend: function () {
-        
+
       },
       complete: function () {
-       
          var submit_button = document.getElementById('submit_button');
          submit_button.classList.remove("disable-button");
       },
@@ -119,122 +107,119 @@ $(document).ready(function () {
     var securesubmit_public_key = '<?php echo $securesubmit_public_key;?>';
     var image_base = '<?php echo $base_url; ?>catalog/view/image';
 
-      GlobalPayments.configure({
-        "publicApiKey": '<?php echo $securesubmit_public_key;?>'
-      });
+    GlobalPayments.configure({
+      "publicApiKey": '<?php echo $securesubmit_public_key;?>'
+    });
 
-      // Create a new `HPS` object with the necessary configuration
-      window.hps = GlobalPayments.ui.form({
-        fields: {
-          "card-number": {
-            placeholder: "•••• •••• •••• ••••",
-            target: "#securesubmitIframeCardNumber"
-          },
-          "card-expiration": {
-            placeholder: "MM / YYYY",
-            target: "#securesubmitIframeCardExpiration"
-          },
-          "card-cvv": {
-            placeholder: "•••",
-            target: "#securesubmitIframeCardCvv"
-          },
-          "submit": {
-            target: "#submit_button",
-            text: "Confirm Order"
-          }
+    // Create a new `HPS` object with the necessary configuration
+    window.hps = GlobalPayments.ui.form({
+      fields: {
+        "card-number": {
+          placeholder: "•••• •••• •••• ••••",
+          target: "#securesubmitIframeCardNumber"
         },
-        styles:  {
-            'html' : {
-              "-webkit-text-size-adjust": "100%"
-            },
-            'body' : {
-              'width' : '100%'
-            },
-            '#secure-payment-field-wrapper' : {
-              'position' : 'relative',
-              'justify-content'  : 'flex-end',
-              'margin': '0 12px'
-            },
-            '#secure-payment-field' : {
-              'background-color' : '#fff',
-              'border'           : '1px solid #ccc',
-              'border-radius'    : '4px',
-              'display'          : 'block',
-              'font-size'        : '14px',
-              'height'           : '35px',
-              'padding'          : '6px 12px',
-              'width'            : '100%',
-            },
-            '#secure-payment-field:focus' : {
-              "border": "1px solid lightblue",
-              "box-shadow": "0 1px 3px 0 #cecece",
-              "outline": "none"
-            },
-            'button#secure-payment-field.submit' : {
-                  'width': 'unset',
-                  'flex': 'unset',
-                  'float': 'right',
-                  'color': '#fff',
-                  'background': '#2e6da4',
-                  'cursor': 'pointer'
-            },
-            '.card-number::-ms-clear' : {
-              'display' : 'none'
-            },
-            'input[placeholder]' : {
-              'letter-spacing' : '.5px',
-            },
-          }
-      });
-
-      window.hps.on('submit', 'click', function(){
-        var submit_button = document.getElementById('submit_button');
-         submit_button.classList.add("disable-button");
-      });
-
-    
-
-      window.hps.on("token-success", function(resp) {
-        window.hps.errors();
-        if(resp.details.cardSecurityCode == false){
-            document.getElementById("gps-expiry-error").style.display = 'block';
-            document.getElementById("gps-expiry-error").innerText = 'Invalid Card Details';
-            var submit_button = document.getElementById('submit_button');
-            submit_button.classList.remove("disable-button");
-        }else{
-            secureSubmitResponseHandler(resp);
+        "card-expiration": {
+          placeholder: "MM / YYYY",
+          target: "#securesubmitIframeCardExpiration"
+        },
+        "card-cvv": {
+          placeholder: "•••",
+          target: "#securesubmitIframeCardCvv"
+        },
+        "submit": {
+          target: "#submit_button",
+          text: "Confirm Order"
         }
-     });
+      },
+      styles:  {
+        'html' : {
+            "-webkit-text-size-adjust": "100%"
+        },
+        'body' : {
+          'width' : '100%'
+        },
+        '#secure-payment-field-wrapper' : {
+          'position' : 'relative',
+          'justify-content'  : 'flex-end',
+          'margin': '0 12px'
+        },
+        '#secure-payment-field' : {
+          'background-color' : '#fff',
+          'border'           : '1px solid #ccc',
+          'border-radius'    : '4px',
+          'display'          : 'block',
+          'font-size'        : '14px',
+          'height'           : '35px',
+          'padding'          : '6px 12px',
+          'width'            : '100%',
+        },
+        '#secure-payment-field:focus' : {
+          "border": "1px solid lightblue",
+          "box-shadow": "0 1px 3px 0 #cecece",
+          "outline": "none"
+        },
+        'button#secure-payment-field.submit' : {
+              'width': 'unset',
+              'flex': 'unset',
+              'float': 'right',
+              'color': '#fff',
+              'background': '#2e6da4',
+              'cursor': 'pointer'
+        },
+        '.card-number::-ms-clear' : {
+          'display' : 'none'
+        },
+        'input[placeholder]' : {
+          'letter-spacing' : '.5px',
+        },
+      }
+    });
 
-      window.hps.on("token-error", function(resp) {
-        if(resp.error){
-          resp.reasons.forEach(function(v){
-              if(v.code == "INVALID_CARD_NUMBER"){
-                document.getElementById("gps-card-error").style.display = 'block';
-                document.getElementById("gps-card-error").innerText = v.message;
-              }else{
-                alert(v.message);
-              }
-          })
-        }
+    window.hps.on('submit', 'click', function(){
+      var submit_button = document.getElementById('submit_button');
+      submit_button.classList.add("disable-button");
+    });
+
+    window.hps.on("token-success", function(resp) {
+      window.hps.errors();
+      if(resp.details.cardSecurityCode == false){
+        document.getElementById("gps-expiry-error").style.display = 'block';
+        document.getElementById("gps-expiry-error").innerText = 'Invalid Card Details';
         var submit_button = document.getElementById('submit_button');
         submit_button.classList.remove("disable-button");
-     });
-
-      window.hps.errors = function(){
-          var errorsDiv = document.getElementsByClassName("error-message");
-          for(var i = 0; i < errorsDiv.length; i++){
-              errorsDiv[i].style.display = "none";
-          }
+      }else{
+        secureSubmitResponseHandler(resp);
       }
+    });
 
-      window.hps.stopConfirm = function(){
-          var errorsDiv = document.getElementsByClassName("error-message");
-          for(var i = 0; i < errorsDiv.length; i++){
-              errorsDiv[i].style.display = "none";
-          }
+    window.hps.on("token-error", function(resp) {
+      if(resp.error){
+        resp.reasons.forEach(function(v){
+            if(v.code == "INVALID_CARD_NUMBER"){
+              document.getElementById("gps-card-error").style.display = 'block';
+              document.getElementById("gps-card-error").innerText = v.message;
+            }else{
+              alert(v.message);
+            }
+        })
       }
-    
+      var submit_button = document.getElementById('submit_button');
+      submit_button.classList.remove("disable-button");
+    });
+
+    window.hps.errors = function(){
+      var errorsDiv = document.getElementsByClassName("error-message");
+      for(var i = 0; i < errorsDiv.length; i++){
+          errorsDiv[i].style.display = "none";
+      }
+    }
+
+    window.hps.stopConfirm = function(){
+      var errorsDiv = document.getElementsByClassName("error-message");
+      for(var i = 0; i < errorsDiv.length; i++){
+          errorsDiv[i].style.display = "none";
+      }
+    }
   }
 });
 </script>
