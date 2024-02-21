@@ -34,7 +34,8 @@
         <?php if ($securesubmit_use_iframes): ?>
           <div id="securesubmitIframeCardNumber" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="tel" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />
+          <div id="securesubmitIframeCardNumber" class="ss-frame-container"></div>
+          <!--<input type="tel" value="" placeholder="•••• •••• •••• ••••" id="input-cc-number" class="form-control ss-form-control card-type-icon" />-->
         <?php endif; ?>
          <p class="error-message" id="gps-card-error"></p>
     </div>
@@ -45,7 +46,8 @@
         <?php if ($securesubmit_use_iframes): ?>
           <div id="securesubmitIframeCardExpiration" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="tel" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />
+          <div id="securesubmitIframeCardExpiration" class="ss-frame-container"></div>
+          <!--<input type="tel" name="cc_expire_date" id="input-cc-expire-date" class="form-control ss-form-control" placeholder="MM / YYYY" />-->
         <?php endif; ?>
         <p class="error-message" id="gps-expiry-error"></p>
     </div>
@@ -55,7 +57,8 @@
         <?php if ($securesubmit_use_iframes): ?>
           <div id="securesubmitIframeCardCvv" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="tel" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
+          <div id="securesubmitIframeCardCvv" class="ss-frame-container"></div>
+          <!--<input type="tel" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />-->
         <?php endif; ?>
         <p class="error-message" id="gps-cvv-error"></p>
     </div>
@@ -63,7 +66,7 @@
         <?php if ($securesubmit_use_iframes): ?>
           <div id="submit_button" class="ss-frame-container"></div>
         <?php else: ?>
-          <input type="tel" value="" placeholder="<?php echo $entry_cc_cvv2; ?>" id="input-cc-cvv2" class="form-control ss-form-control cvv-icon"  />
+          <div id="submit_button" class="ss-frame-container"></div>
         <?php endif; ?>
     </div>
   </fieldset>
@@ -75,7 +78,7 @@
 </div>
 <script type="text/javascript"><!--
 $(document).ready(function () {
-  $('#button-confirm').bind('click', secureSubmitFormHandler);
+  //$('#button-confirm').bind('click', secureSubmitFormHandler);
   $("#input-cc-number").keydown(function (e) {
     // Allow: backspace, delete, tab, escape, enter and .
     if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
@@ -312,9 +315,129 @@ $(document).ready(function () {
           }
       }
     } else {
-      Heartland.Card.attachNumberEvents('#input-cc-number');
+      
+      GlobalPayments.configure({
+        "publicApiKey": '<?php echo $securesubmit_public_key;?>'
+      });
+
+      // Create a new `HPS` object with the necessary configuration
+      window.hps = GlobalPayments.ui.form({
+        fields: {
+          "card-number": {
+            placeholder: "•••• •••• •••• ••••",
+            target: "#securesubmitIframeCardNumber"
+          },
+          "card-expiration": {
+            placeholder: "MM / YYYY",
+            target: "#securesubmitIframeCardExpiration"
+          },
+          "card-cvv": {
+            placeholder: "•••",
+            target: "#securesubmitIframeCardCvv"
+          },
+          "submit": {
+            target: "#submit_button",
+            text: "Confirm Order"
+          }
+        },
+        styles:  {
+            'html' : {
+              "-webkit-text-size-adjust": "100%"
+            },
+            'body' : {
+              'width' : '100%'
+            },
+            '#secure-payment-field-wrapper' : {
+              'position' : 'relative',
+              'justify-content'  : 'flex-end',
+              'margin': '0 12px'
+            },
+            '#secure-payment-field' : {
+              'background-color' : '#fff',
+              'border'           : '1px solid #ccc',
+              'border-radius'    : '4px',
+              'display'          : 'block',
+              'font-size'        : '14px',
+              'height'           : '35px',
+              'padding'          : '6px 12px',
+              'width'            : '100%',
+            },
+            '#secure-payment-field:focus' : {
+              "border": "1px solid lightblue",
+              "box-shadow": "0 1px 3px 0 #cecece",
+              "outline": "none"
+            },
+            'button#secure-payment-field.submit' : {
+                  'width': 'unset',
+                  'flex': 'unset',
+                  'float': 'right',
+                  'color': '#fff',
+                  'background': '#2e6da4',
+                  'cursor': 'pointer'
+            },
+            '.card-number::-ms-clear' : {
+              'display' : 'none'
+            },
+            'input[placeholder]' : {
+              'letter-spacing' : '.5px',
+            },
+          }
+      });
+
+      window.hps.on('submit', 'click', function(){
+        var submit_button = document.getElementById('submit_button');
+         submit_button.classList.add("disable-button");
+      });
+
+      window.hps.ready(
+        function () {
+          document.getElementById("button-confirm").style.display = "none";
+        }
+      );
+
+      window.hps.on("token-success", function(resp) {
+        window.hps.errors();
+        if(resp.details.cardSecurityCode == false){
+            document.getElementById("gps-expiry-error").style.display = 'block';
+            document.getElementById("gps-expiry-error").innerText = 'Invalid Card Details';
+            var submit_button = document.getElementById('submit_button');
+            submit_button.classList.remove("disable-button");
+        }else{
+            secureSubmitResponseHandler(resp);
+        }
+     });
+
+      window.hps.on("token-error", function(resp) {
+        if(resp.error){
+          resp.reasons.forEach(function(v){
+              if(v.code == "INVALID_CARD_NUMBER"){
+                document.getElementById("gps-card-error").style.display = 'block';
+                document.getElementById("gps-card-error").innerText = v.message;
+              }else{
+                alert(v.message);
+              }
+          })
+        }
+        var submit_button = document.getElementById('submit_button');
+        submit_button.classList.remove("disable-button");
+     });
+
+      window.hps.errors = function(){
+          var errorsDiv = document.getElementsByClassName("error-message");
+          for(var i = 0; i < errorsDiv.length; i++){
+              errorsDiv[i].style.display = "none";
+          }
+      }
+
+      window.hps.stopConfirm = function(){
+          var errorsDiv = document.getElementsByClassName("error-message");
+          for(var i = 0; i < errorsDiv.length; i++){
+              errorsDiv[i].style.display = "none";
+          }
+      }
+      /*Heartland.Card.attachNumberEvents('#input-cc-number');
       Heartland.Card.attachExpirationEvents('#input-cc-expire-date');
-      Heartland.Card.attachCvvEvents('#input-cc-cvv2');
+      Heartland.Card.attachCvvEvents('#input-cc-cvv2');*/
     }
   }
 });
