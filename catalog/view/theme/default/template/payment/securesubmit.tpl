@@ -43,7 +43,7 @@
   </fieldset>
 </form>
 
-<script type="text/javascript"><!--
+<script type="text/javascript">
 $(document).ready(function () {
   
   function secureSubmitResponseHandler(response) {
