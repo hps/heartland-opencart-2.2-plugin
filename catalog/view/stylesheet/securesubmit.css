@@ -31,6 +31,17 @@
   clear:none;
 }
 
+.form-horizontal p.error-message {
+  color:red;
+  display: none;
+  margin:0px 15px;
+}
+
+.form-horizontal div.disable-button{
+  pointer-events: none;
+  opacity: 0.65;
+}
+
 .form-group {
   margin-bottom:none;
 }
