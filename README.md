@@ -1,3 +1,5 @@
+# ** This repository is no longer maintained! **
+
 ## SecureSubmit OpenCart Payment Gateway
 
 This extension allows OpenCart to use the Heartland Payment Systems Gateway. All card data is tokenized using Heartland's SecureSubmit product.
